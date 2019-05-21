@@ -1,0 +1,9 @@
+daml 1.2
+module Main where
+
+-- import Ethereum.Address
+-- import Ethereum.SmartContract
+-- import Ethereum.ERC20
+-- import Ethereum.Onboarding
+-- import Ethereum.Transaction
+import Ethereum.Utils
