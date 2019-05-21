@@ -1,0 +1,108 @@
+daml 1.2
+
+module Ethereum.Onboarding where
+
+import Ethereum.Call
+import Ethereum.ERC20Contract
+import Ethereum.SmartContract
+import Ethereum.Transaction
+import Ethereum.Transfer
+import Ethereum.Utils
+
+type UserInvitationCid = ContractId UserInvitation
+type UserCid = ContractId User
+
+
+template Operator
+  with
+    operator : Party
+  where
+    signatory operator
+
+    controller operator can
+      nonconsuming Operator_InviteUser : UserInvitationCid
+        with
+          user : Party
+        do
+          create UserInvitation with ..
+
+      nonconsuming Operator_ERC20User : ERC20ContractCid
+        with
+          user : Party
+          name : Text
+          symbol : Text
+          decimals : Int
+          address : Text
+        do
+          create ERC20Contract with ..
+
+
+template UserInvitation
+  with
+    operator : Party
+    user     : Party
+  where
+    signatory operator
+
+    controller user can
+      UserInvitation_Accept : UserCid
+        do create User with ..
+
+      UserInvitation_Reject : ()
+        do return ()
+
+    controller operator can
+      UserInvitation_Cancel : ()
+        do return ()
+
+
+template User
+  with
+    operator : Party
+    user     : Party
+  where
+    signatory operator, user
+
+    controller user can
+      nonconsuming User_NewSmartContract : NewSmartContractRequestCid
+        with
+          from : Text
+          contractName : Text
+          optSolidity : Optional Text
+          optBin : Optional Text
+          ctorArgs : [ABIValue]
+          optValue : Optional EtherUnits
+          optGas : Optional Int
+        do create NewSmartContractRequest with name = contractName, ..
+
+      nonconsuming User_Call : CallRequestCid
+        with
+          functionName : Text
+          args : [ABIValue]
+          returns : [ABIType]
+          optFrom : Optional Text
+          to : Text
+        do create CallRequest with name = functionName, ..
+
+      nonconsuming User_Transact : TransactionRequestCid
+        with
+          functionName : Text
+          args : [ABIValue]
+          returns : [ABIType]
+          from : Text
+          to : Text
+          optValue : Optional EtherUnits
+          optGas : Optional Int
+        do create TransactionRequest with name = functionName, ..
+
+      nonconsuming User_SendEther : TransferRequestCid
+        with
+          from : Text
+          to : Text
+          value : EtherUnits
+          optGas : Optional Int
+        do create TransferRequest with ..
+
+    controller operator can
+      User_Revoke : ()
+        do return ()

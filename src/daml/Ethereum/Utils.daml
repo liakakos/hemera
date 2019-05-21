@@ -2,16 +2,16 @@ daml 1.2
 
 module Ethereum.Utils where
 
-import DA.Date
 import DA.Text
 
-data EtherUnits = Wei Decimal
-                | Kwei Decimal
-                | Mwei Decimal
-                | Gwei Decimal
-                | Szabo Decimal
+
+data EtherUnits = Wei    Decimal
+                | Kwei   Decimal
+                | Mwei   Decimal
+                | Gwei   Decimal
+                | Szabo  Decimal
                 | Finney Decimal
-                | Ether Decimal
+                | Ether  Decimal
                 | Kether Decimal
                 | Mether Decimal
                 | Gether Decimal
@@ -21,26 +21,32 @@ data EtherUnits = Wei Decimal
 toWeiText : EtherUnits -> Text
 toWeiText etherUnits =
   let wei = case etherUnits of
-        Wei v -> v
-        Kwei v -> v * 1e3
-        Mwei v -> v * 1e6
-        Gwei v -> v * 1e9
-        Szabo v -> v * 1e12
+        Wei    v -> v
+        Kwei   v -> v * 1e3
+        Mwei   v -> v * 1e6
+        Gwei   v -> v * 1e9
+        Szabo  v -> v * 1e12
         Finney v -> v * 1e15
-        Ether v -> v * 1e18
+        Ether  v -> v * 1e18
         Kether v -> v * 1e21
         Mether v -> v * 1e24
         Gether v -> v * 1e27
   in DA.Text.takeWhile (\c -> c /= ".") $ show wei
 
 
-data ABIType = ABIBool Bool
-             | ABIUint Text
-             | ABIInt Text
-             | ABIBytes Text
-             | ABIString Text
-             | ABIAddress Text
-             | ABIList [ABIType]
+data ABIType = ABIBool
+             | ABIUint
+             | ABIInt
+             | ABIBytes
+             | ABIString
+             | ABIAddress
+  deriving (Eq, Show)
+
+
+data ABIValue = ABIValue with
+                  abiType  : ABIType
+                  abiValue : Text
+              | ABIList [ABIValue]
   deriving (Eq, Show)
 
 
@@ -54,4 +60,11 @@ data SendStatus = New
                     reason : Text
   deriving (Eq, Show)
 
-epoch : Time = datetime 1970 Jan 1 0 0 0
+
+checkNesting : [ABIValue] -> Int -> Int -> Bool
+checkNesting _ curr limit | curr == limit = False
+checkNesting [] _ _ = True
+checkNesting (x::xs) i limit =
+  case x of
+    ABIList y -> checkNesting y (i+1) limit && checkNesting xs i limit
+    _  -> checkNesting xs i limit

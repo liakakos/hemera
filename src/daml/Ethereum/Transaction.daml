@@ -1,0 +1,98 @@
+daml 1.2
+
+module Ethereum.Transaction where
+
+import Ethereum.Utils
+
+import DA.Optional
+
+type TransactionRequestCid = ContractId TransactionRequest
+type UnsignedTransactionCid = ContractId UnsignedTransaction
+type SignedTransactionCid = ContractId SignedTransaction
+
+
+template TransactionRequest
+  with
+    operator : Party
+    user     : Party
+    name     : Text
+    args     : [ABIValue]
+    returns  : [ABIType]
+    from     : Text
+    to       : Text
+    optValue : Optional EtherUnits
+    optGas   : Optional Int
+  where
+    signatory operator, user
+
+    controller operator can
+      TransactionRequest_Accept : UnsignedTransactionCid
+        with
+          nonce : Int
+          gas : Int
+          gasPrice : EtherUnits
+          txToSign : Text
+        do
+          assert (fromOptional gas optGas == gas)
+          let value = fromOptional (Wei 0.0) optValue
+          create UnsignedTransaction with ..
+
+      TransactionRequest_Reject : ()
+        do return ()
+
+
+template UnsignedTransaction
+  with
+    operator : Party
+    user     : Party
+    name     : Text
+    args     : [ABIValue]
+    returns  : [ABIType]
+    from     : Text
+    to       : Text
+    value    : EtherUnits
+    nonce    : Int
+    gas      : Int
+    gasPrice : EtherUnits
+    txToSign : Text
+  where
+    signatory operator, user
+
+    controller user can
+      UnsignedTransaction_Sign : SignedTransactionCid
+        with
+          signedTx : Text
+        do create SignedTransaction with sendStatus = New, ..
+
+
+template SignedTransaction
+  with
+    operator   : Party
+    user       : Party
+    name       : Text
+    args       : [ABIValue]
+    returns    : [ABIType]
+    from       : Text
+    to         : Text
+    value      : EtherUnits
+    nonce      : Int
+    gas        : Int
+    gasPrice   : EtherUnits
+    txToSign   : Text
+    signedTx   : Text
+    sendStatus : SendStatus
+  where
+    signatory operator, user
+
+    controller user can
+      SignedTransaction_Send : SignedTransactionCid
+        do create this with sendStatus = Pending
+
+    controller operator can
+      SignedTransaction_Sent : SignedTransactionCid
+        with
+          newSendStatus : SendStatus
+        do
+          assert (sendStatus == Pending)
+          timeNow <- getTime
+          create this with sendStatus = newSendStatus

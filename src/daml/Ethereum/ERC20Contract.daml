@@ -1,0 +1,177 @@
+daml 1.2
+
+module Ethereum.ERC20Contract where
+
+import Ethereum.Call
+import Ethereum.Transaction
+import Ethereum.Utils
+
+type ERC20ContractCid = ContractId ERC20Contract
+
+
+template ERC20Contract
+  with
+    operator : Party
+    user     : Party
+    name     : Text
+    symbol   : Text
+    decimals : Int
+    address  : Text
+  where
+    signatory operator
+
+    ensure decimals >= 0
+
+    controller user can
+      nonconsuming ERC20Contract_TotalSupply : CallRequestCid
+        do create CallRequest
+             with
+               name = "totalSupply"
+               args = []
+               returns = [ABIUint]
+               optFrom = None
+               to = address
+               ..
+
+      nonconsuming ERC20Contract_BalanceOf : CallRequestCid
+        with
+          owner : Text
+        do
+          let abiOwner = ABIValue with
+                                abiType = ABIAddress
+                                abiValue = owner
+              balance = ABIUint
+          create CallRequest
+            with
+              name = "balanceOf"
+              args = [abiOwner]
+              returns = [balance]
+              optFrom = None
+              to = address
+              ..
+
+      nonconsuming ERC20Contract_Allowance : CallRequestCid
+        with
+          owner : Text
+          spender : Text
+        do
+          let abiOwner = ABIValue with
+                                abiType = ABIAddress
+                                abiValue = owner
+              abiSpender = ABIValue with
+                             abiType = ABIAddress
+                             abiValue = spender
+              remaining = ABIUint
+          create CallRequest
+            with
+              name = "allowance"
+              args = [abiOwner, abiSpender]
+              returns = [remaining]
+              optFrom = None
+              to = address
+              ..
+
+      nonconsuming ERC20Contract_Transfer : TransactionRequestCid
+        with
+          to : Text
+          value : Text
+          requester : Text
+          optGas : Optional Int
+        do
+          let abiTo = ABIValue with
+                        abiType = ABIAddress
+                        abiValue = to
+              abiValue = ABIValue with
+                           abiType = ABIUint
+                           abiValue = value
+              success = ABIBool
+          create TransactionRequest
+            with
+              name = "transfer"
+              args = [abiTo, abiValue]
+              returns = [success]
+              from = requester
+              optValue = None
+              ..
+
+      nonconsuming ERC20Contract_Approve : TransactionRequestCid
+        with
+          spender : Text
+          value : Text
+          requester : Text
+          optGas : Optional Int
+        do
+          let abiSpender = ABIValue with
+                             abiType = ABIAddress
+                             abiValue = spender
+              abiValue = ABIValue with
+                           abiType = ABIUint
+                           abiValue = value
+              success = ABIBool
+          create TransactionRequest
+            with
+              name = "approve"
+              args = [abiSpender, abiValue]
+              returns = [success]
+              from = requester
+              to = address
+              optValue = None
+              ..
+
+      nonconsuming ERC20Contract_TransferFrom : TransactionRequestCid
+        with
+          from : Text
+          to : Text
+          value : Text
+          requester : Text
+          optGas : Optional Int
+        do
+          let abiFrom = ABIValue with
+                          abiType = ABIAddress
+                          abiValue = from
+              abiTo = ABIValue with
+                        abiType = ABIAddress
+                        abiValue = from
+              abiValue = ABIValue with
+                           abiType = ABIUint
+                           abiValue = value
+              success = ABIBool
+          create TransactionRequest
+            with
+              name = "transferFrom"
+              args = [abiFrom, abiTo, abiValue]
+              returns = [success]
+              from = requester
+              to = address
+              optValue = None
+              ..
+
+      nonconsuming ERC20Contract_Name : CallRequestCid
+        do create CallRequest
+             with
+               name = "name"
+               args = []
+               returns = [ABIString]
+               optFrom = None
+               to = address
+               ..
+
+      nonconsuming ERC20Contract_Symbol : CallRequestCid
+        do create CallRequest
+             with
+               name = "symbol"
+               args = []
+               returns = [ABIString]
+               optFrom = None
+               to = address
+               ..
+
+      nonconsuming ERC20Contract_Decimals : CallRequestCid
+        do create CallRequest
+             with
+               name = "decimals"
+               args = []
+               returns = [ABIUint]
+               optFrom = None
+               to = address
+               ..

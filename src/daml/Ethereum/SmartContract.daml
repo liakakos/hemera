@@ -1,0 +1,110 @@
+daml 1.2
+
+module Ethereum.SmartContract where
+
+import Ethereum.Utils
+
+import DA.Optional
+
+type NewSmartContractRequestCid = ContractId NewSmartContractRequest
+type UnsignedNewContractTransactionCid = ContractId UnsignedNewContractTransaction
+type SignedNewContractTransactionCid = ContractId SignedNewContractTransaction
+
+
+template NewSmartContractRequest
+  with
+    operator    : Party
+    user        : Party
+    from        : Text
+    name        : Text
+    optSolidity : Optional Text
+    optBin      : Optional Text
+    ctorArgs    : [ABIValue]
+    optValue    : Optional EtherUnits
+    optGas      : Optional Int
+  where
+    signatory operator, user
+
+    ensure (optSolidity /= None || optBin /= None) &&
+      checkNesting ctorArgs 0 2
+
+    controller operator can
+      NewSmartContractRequest_Accept : UnsignedNewContractTransactionCid
+        with
+          abi : Text
+          bin : Text
+          nonce : Int
+          gas : Int
+          gasPrice : EtherUnits
+          txToSign : Text
+        do
+          assert (fromOptional gas optGas == gas)
+          let solidity = fromOptional "" optSolidity
+              value = fromOptional (Wei 0.0) optValue
+          create UnsignedNewContractTransaction with ..
+
+      NewSmartContractRequest_Reject : ()
+        do return ()
+
+
+template UnsignedNewContractTransaction
+  with
+    operator : Party
+    user     : Party
+    from     : Text
+    name     : Text
+    solidity : Text
+    abi      : Text
+    bin      : Text
+    ctorArgs : [ABIValue]
+    value    : EtherUnits
+    nonce    : Int
+    gas      : Int
+    gasPrice : EtherUnits
+    txToSign : Text
+  where
+    signatory operator, user
+
+    controller user can
+      UnsignedNewContractTransaction_Sign : SignedNewContractTransactionCid
+        with
+          signedTx : Text
+        do create SignedNewContractTransaction with sendStatus = New, ..
+
+
+template SignedNewContractTransaction
+  with
+    operator   : Party
+    user       : Party
+    from       : Text
+    name       : Text
+    solidity   : Text
+    abi        : Text
+    bin        : Text
+    ctorArgs   : [ABIValue]
+    value      : EtherUnits
+    nonce      : Int
+    gas        : Int
+    gasPrice   : EtherUnits
+    txToSign   : Text
+    signedTx   : Text
+    sendStatus : SendStatus
+  where
+    signatory operator, user
+
+    controller user can
+      SignedNewContractTransaction_Deploy : SignedNewContractTransactionCid
+        do create this with sendStatus = Pending
+
+    controller operator can
+      SignedNewContractTransaction_Sent : SignedNewContractTransactionCid
+        with
+          newSendStatus : SendStatus
+        do
+          assert (sendStatus == Pending)
+          create this with sendStatus = newSendStatus
+
+      SignedNewContractTransaction_Fail : SignedNewContractTransactionCid
+        with
+          reason : Text
+        do create this with sendStatus = FailedToSend with ..

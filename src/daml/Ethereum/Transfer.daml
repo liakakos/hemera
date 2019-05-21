@@ -1,0 +1,92 @@
+daml 1.2
+
+module Ethereum.Transfer where
+
+import Ethereum.Utils
+
+import DA.Optional
+
+type TransferRequestCid = ContractId TransferRequest
+type UnsignedTrasferTransactionCid = ContractId UnsignedTrasferTransaction
+type SignedTrasferTransactionCid = ContractId SignedTrasferTransaction
+
+
+template TransferRequest
+  with
+    operator : Party
+    user     : Party
+    from     : Text
+    to       : Text
+    value    : EtherUnits
+    optGas   : Optional Int
+  where
+    signatory operator, user
+
+    controller operator can
+      TransferRequest_Accept : UnsignedTrasferTransactionCid
+        with
+          nonce : Int
+          gas : Int
+          gasPrice : EtherUnits
+          txToSign : Text
+        do
+          assert (fromOptional gas optGas == gas)
+          create UnsignedTrasferTransaction with ..
+
+      TransferRequest_Reject : ()
+        do return ()
+
+
+template UnsignedTrasferTransaction
+  with
+    operator : Party
+    user     : Party
+    from     : Text
+    to       : Text
+    value    : EtherUnits
+    nonce    : Int
+    gas      : Int
+    gasPrice : EtherUnits
+    txToSign : Text
+  where
+    signatory operator, user
+
+    controller user can
+      UnsignedTrasferTransaction_Sign : SignedTrasferTransactionCid
+        with
+          signedTx : Text
+        do create SignedTrasferTransaction with sendStatus = New, ..
+
+
+template SignedTrasferTransaction
+  with
+    operator   : Party
+    user       : Party
+    from       : Text
+    to         : Text
+    value      : EtherUnits
+    nonce      : Int
+    gas        : Int
+    gasPrice   : EtherUnits
+    txToSign   : Text
+    signedTx   : Text
+    sendStatus : SendStatus
+  where
+    signatory operator, user
+
+    controller user can
+      SignedTrasferTransaction_Send : SignedTrasferTransactionCid
+        do create this with sendStatus = Pending
+
+    controller operator can
+      SignedTrasferTransaction_Sent : SignedTrasferTransactionCid
+        with
+          newSendStatus : SendStatus
+        do
+          assert (sendStatus == Pending)
+          create this with sendStatus = newSendStatus
+
+      SignedTrasferTransaction_Fail : SignedTrasferTransactionCid
+        with
+          reason : Text
+        do create this with sendStatus = FailedToSend with ..

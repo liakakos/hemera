@@ -1,0 +1,44 @@
+daml 1.2
+
+module Ethereum.Call where
+
+import Ethereum.Utils
+
+type CallRequestCid = ContractId CallRequest
+type CallResponseCid = ContractId CallResponse
+
+
+template CallRequest
+  with
+    operator : Party
+    user     : Party
+    name     : Text
+    args     : [ABIValue]
+    returns  : [ABIType]
+    optFrom  : Optional Text
+    to       : Text
+  where
+    signatory operator, user
+
+    controller operator can
+      CallRequest_Respond : CallResponseCid
+        with
+          response : [ABIValue]
+          sendStatus : SendStatus
+        do
+          assert (length response == length returns)
+          create CallResponse with ..
+
+
+template CallResponse
+  with
+    operator   : Party
+    user       : Party
+    name       : Text
+    args       : [ABIValue]
+    response   : [ABIValue]
+    optFrom    : Optional Text
+    to         : Text
+    sendStatus : SendStatus
+  where
+    signatory operator, user
