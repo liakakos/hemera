@@ -4,8 +4,10 @@ import com.daml.ledger.javaapi.data.*;
 import com.daml.ledger.rxjava.DamlLedgerClient;
 import com.daml.ledger.rxjava.components.Bot;
 import hemera.bots.CallBot;
+import hemera.bots.SmartContractBot;
 import hemera.bots.TransactionBot;
 import hemera.model.ethereum.call.CallRequest;
+import hemera.model.ethereum.smartcontract.NewSmartContractRequest;
 import hemera.model.ethereum.transaction.TransactionRequest;
 
 import java.util.*;
@@ -42,6 +44,20 @@ public class OperatorMain {
         TransactionBot transactionBot = new TransactionBot(APP_ID, ledgerId, party);
         Bot.wire(APP_ID, client, transactionRequestFilter,
                 transactionBot::process, transactionBot::getRecordFromContract);
+
+        Set<Identifier> smartContractRequestTids = new HashSet<>(Collections.singletonList(NewSmartContractRequest.TEMPLATE_ID));
+        TransactionFilter smartContractRequestFilter = filterFor(smartContractRequestTids, party);
+        SmartContractBot smartContractBot = new SmartContractBot(APP_ID, ledgerId, party);
+        Bot.wire(APP_ID, client, smartContractRequestFilter,
+                smartContractBot::process, smartContractBot::getRecordFromContract);
+
+        // Run until user terminates
+        while (true)
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
     }
 
     private static TransactionFilter filterFor(Set<Identifier> templateIds, String party) {

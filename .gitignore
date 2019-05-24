@@ -1,5 +1,7 @@
 target/
 *.log
-ui-backend.conf
 .idea
 *.iml
+.interfaces/
+.package-database/
+

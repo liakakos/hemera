@@ -1,0 +1,13 @@
+sdk-version: 0.12.20
+name: hemera
+source: src/daml/Main.daml
+scenario: Main:setup
+parties:
+  - Alice
+  - Bob
+version: 1.0.0
+exposed-modules:
+  - Main
+dependencies:
+  - daml-prim
+  - daml-stdlib

@@ -14,9 +14,9 @@
         <daml-codegen-java.output>${project.build.directory}/generated-sources</daml-codegen-java.output>
         <ledgerHost>localhost</ledgerHost>
         <ledgerPort>6865</ledgerPort>
-        <operatorParty>Operator</operatorParty>
-        <clientParty>Alice</clientParty>
-        <infuraEndpoint>infuraEndpoint</infuraEndpoint>
+        <operatorParty>Alice</operatorParty>
+        <clientParty>Bob</clientParty>
+        <infuraEndpoint>InfuraEndpoint</infuraEndpoint>
         <privateKey>yourPrivateKey</privateKey>
     </properties>
 
@@ -24,18 +24,13 @@
         <dependency>
             <groupId>com.daml.ledger</groupId>
             <artifactId>bindings-rxjava</artifactId>
-            <version>100.12.1</version>
+            <version>100.12.20</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.google.protobuf</groupId>
                     <artifactId>protobuf-lite</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.digitalasset</groupId>
-            <artifactId>daml-lf-archive</artifactId>
-            <version>100.12.1</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
@@ -47,9 +42,22 @@
             <artifactId>core</artifactId>
             <version>4.2.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.ethereum</groupId>
+            <artifactId>ethereumj-core</artifactId>
+            <version>1.12.0-RELEASE</version>
+        </dependency>
     </dependencies>
 
     <repositories>
+        <repository>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>bintray-ethereum-maven</id>
+            <name>bintray</name>
+            <url>https://dl.bintray.com/ethereum/maven</url>
+        </repository>
         <repository>
             <snapshots>
                 <enabled>false</enabled>
@@ -80,7 +88,7 @@
                     <dependency>
                         <groupId>com.daml.java</groupId>
                         <artifactId>codegen</artifactId>
-                        <version>100.12.1</version>
+                        <version>100.12.20</version>
                         <type>jar</type>
                     </dependency>
                 </dependencies>
@@ -112,6 +120,7 @@
                         </goals>
                         <configuration>
                             <mainClass>hemera.OperatorMain</mainClass>
+                            <cleanupDaemonThreads>false</cleanupDaemonThreads>
                             <arguments>
                                 <argument>${ledgerHost}</argument>
                                 <argument>${ledgerPort}</argument>
