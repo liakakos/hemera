@@ -96,3 +96,8 @@ template SignedTransaction
           assert (sendStatus == Pending)
           timeNow <- getTime
           create this with sendStatus = newSendStatus
+
+      SignedTransaction_Fail : SignedTransactionCid
+        with
+          reason : Text
+        do create this with sendStatus = FailedToSend with ..
