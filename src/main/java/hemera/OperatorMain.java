@@ -3,17 +3,20 @@ package hemera;
 import com.daml.ledger.javaapi.data.*;
 import com.daml.ledger.rxjava.DamlLedgerClient;
 import com.daml.ledger.rxjava.components.Bot;
-import hemera.bots.CallBot;
-import hemera.bots.SmartContractBot;
-import hemera.bots.TransactionBot;
+import hemera.bots.*;
 import hemera.model.ethereum.call.CallRequest;
 import hemera.model.ethereum.smartcontract.NewSmartContractRequest;
+import hemera.model.ethereum.smartcontract.SignedNewContractTransaction;
+import hemera.model.ethereum.transaction.SignedTransaction;
 import hemera.model.ethereum.transaction.TransactionRequest;
+import hemera.model.ethereum.transfer.SignedTrasferTransaction;
+import hemera.model.ethereum.transfer.TransferRequest;
+import hemera.utils.LedgerUtils;
 
 import java.util.*;
 
 public class OperatorMain {
-    public static final String APP_ID = "HemeraOperator";
+    private static final String APP_ID = "HemeraOperator";
 
     public static void main(String[] args) {
         if (args.length < 4) {
@@ -33,36 +36,48 @@ public class OperatorMain {
 
         String ledgerId = client.getLedgerId();
 
+        // Call
         Set<Identifier> callRequestTids = new HashSet<>(Collections.singletonList(CallRequest.TEMPLATE_ID));
-        TransactionFilter callRequestFilter = filterFor(callRequestTids, party);
+        TransactionFilter callRequestFilter = LedgerUtils.filterFor(callRequestTids, party);
         CallBot callBot = new CallBot(APP_ID, ledgerId, party);
         Bot.wire(APP_ID, client, callRequestFilter, callBot::process, callBot::getRecordFromContract);
 
+        // Transaction
         Set<Identifier> transactionRequestTids = new HashSet<>(Collections.singletonList(
                 TransactionRequest.TEMPLATE_ID));
-        TransactionFilter transactionRequestFilter = filterFor(transactionRequestTids, party);
+        TransactionFilter transactionRequestFilter = LedgerUtils.filterFor(transactionRequestTids, party);
         TransactionBot transactionBot = new TransactionBot(APP_ID, ledgerId, party);
         Bot.wire(APP_ID, client, transactionRequestFilter,
                 transactionBot::process, transactionBot::getRecordFromContract);
 
-        Set<Identifier> smartContractRequestTids = new HashSet<>(Collections.singletonList(NewSmartContractRequest.TEMPLATE_ID));
-        TransactionFilter smartContractRequestFilter = filterFor(smartContractRequestTids, party);
+        // Smart Contract
+        Set<Identifier> smartContractRequestTids = new HashSet<>(Collections.singletonList(
+                NewSmartContractRequest.TEMPLATE_ID));
+        TransactionFilter smartContractRequestFilter = LedgerUtils.filterFor(smartContractRequestTids, party);
         SmartContractBot smartContractBot = new SmartContractBot(APP_ID, ledgerId, party);
         Bot.wire(APP_ID, client, smartContractRequestFilter,
                 smartContractBot::process, smartContractBot::getRecordFromContract);
 
-        // Run until user terminates
+        // Transfer
+        Set<Identifier> transferRequestTids = new HashSet<>(Collections.singletonList(TransferRequest.TEMPLATE_ID));
+        TransactionFilter transferRequestFilter = LedgerUtils.filterFor(transferRequestTids, party);
+        TransferBot transferBot = new TransferBot(APP_ID, ledgerId, party);
+        Bot.wire(APP_ID, client, transferRequestFilter, transferBot::process, transferBot::getRecordFromContract);
+
+        // Send
+        Set<Identifier> signedTransactionTids = new HashSet<>(Arrays.asList(
+                SignedNewContractTransaction.TEMPLATE_ID,
+                SignedTransaction.TEMPLATE_ID,
+                SignedTrasferTransaction.TEMPLATE_ID));
+        TransactionFilter signedTransactionFilter = LedgerUtils.filterFor(signedTransactionTids, party);
+        SendBot sendBot = new SendBot(APP_ID, ledgerId, party);
+        Bot.wire(APP_ID, client, signedTransactionFilter, sendBot::process, sendBot::getRecordFromContract);
+
         while (true)
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-    }
-
-    private static TransactionFilter filterFor(Set<Identifier> templateIds, String party) {
-        InclusiveFilter inclusiveFilter = new InclusiveFilter(templateIds);
-        Map<String, Filter> filter = Collections.singletonMap(party, inclusiveFilter);
-        return new FiltersByParty(filter);
     }
 }

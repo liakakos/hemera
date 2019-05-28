@@ -136,10 +136,12 @@
                         </goals>
                         <configuration>
                             <mainClass>hemera.ClientMain</mainClass>
+                            <cleanupDaemonThreads>false</cleanupDaemonThreads>
                             <arguments>
                                 <argument>${ledgerHost}</argument>
                                 <argument>${ledgerPort}</argument>
                                 <argument>${clientParty}</argument>
+                                <argument>${privateKey}</argument>
                             </arguments>
                         </configuration>
                     </execution>

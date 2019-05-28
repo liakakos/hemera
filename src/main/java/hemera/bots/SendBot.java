@@ -73,6 +73,7 @@ public class SendBot extends AbstractBot {
             try {
                 EthSendTransaction resp = Web3jProvider.getInstance()
                         .web3j.ethSendRawTransaction(contract.data.signedTx).send();
+                Thread.sleep(1000);
                 String txHash = resp.getTransactionHash();
                 SendStatus sendStatus = new Sent(
                         Instant.now(),
@@ -92,6 +93,7 @@ public class SendBot extends AbstractBot {
             try {
                 EthSendTransaction resp = Web3jProvider.getInstance()
                         .web3j.ethSendRawTransaction(contract.data.signedTx).send();
+                Thread.sleep(1000);
                 String txHash = resp.getTransactionHash();
                 SendStatus sendStatus = new Sent(
                         Instant.now(),
@@ -111,6 +113,7 @@ public class SendBot extends AbstractBot {
             try {
                 EthSendTransaction resp = Web3jProvider.getInstance()
                         .web3j.ethSendRawTransaction(contract.data.signedTx).send();
+                Thread.sleep(1000);
                 String txHash = resp.getTransactionHash();
                 SendStatus sendStatus = new Sent(
                         Instant.now(),
