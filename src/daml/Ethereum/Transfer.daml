@@ -13,14 +13,19 @@ type SignedTrasferTransactionCid = ContractId SignedTrasferTransaction
 
 template TransferRequest
   with
-    operator : Party
-    user     : Party
-    from     : Text
-    to       : Text
-    value    : EtherUnits
-    optGas   : Optional Int
+    operator    : Party
+    user        : Party
+    from        : Text
+    to          : Text
+    value       : EtherUnits
+    optGas      : Optional Int
+    optGasPrice : Optional EtherUnits
   where
     signatory operator, user
+
+    ensure fromOptional gasBaseFee optGas >= gasBaseFee &&
+      validEtherUnits value &&
+      validEtherUnits (fromOptional zeroWei optGasPrice)
 
     controller operator can
       TransferRequest_Accept : UnsignedTrasferTransactionCid
@@ -30,7 +35,9 @@ template TransferRequest
           gasPrice : EtherUnits
           txToSign : Text
         do
-          assert (fromOptional gas optGas == gas)
+          assert (gas >= gasBaseFee)
+          assert (fromOptional gas optGas >= gas)
+          assert (fromOptional gasPrice optGasPrice == gasPrice)
           create UnsignedTrasferTransaction with ..
 
       TransferRequest_Reject : ()
@@ -50,6 +57,10 @@ template UnsignedTrasferTransaction
     txToSign : Text
   where
     signatory operator, user
+
+    ensure validEtherUnits value &&
+      validEtherUnits gasPrice &&
+      nonce >= 0
 
     controller user can
       UnsignedTrasferTransaction_Sign : SignedTrasferTransactionCid

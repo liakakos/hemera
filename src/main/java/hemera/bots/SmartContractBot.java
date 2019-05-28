@@ -5,6 +5,7 @@ import com.daml.ledger.javaapi.data.Identifier;
 import com.daml.ledger.javaapi.data.Record;
 import com.daml.ledger.rxjava.components.LedgerViewFlowable;
 import com.daml.ledger.rxjava.components.helpers.CommandsAndPendingSet;
+import hemera.OperatorMain;
 import hemera.Web3jProvider;
 import hemera.model.ethereum.smartcontract.NewSmartContractRequest;
 import hemera.model.ethereum.utils.etherunits.Wei;
@@ -20,6 +21,8 @@ import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.crypto.RawTransaction;
 import org.web3j.crypto.TransactionEncoder;
+import org.web3j.protocol.core.methods.request.Transaction;
+import org.web3j.protocol.core.methods.response.EthEstimateGas;
 import org.web3j.utils.Numeric;
 
 
@@ -32,8 +35,6 @@ import java.util.stream.Collectors;
 public class SmartContractBot extends AbstractBot {
 
     private final static Logger log = LoggerFactory.getLogger(SmartContractBot.class);
-    private final static long defaultGasLimit = 50000;
-    private final static BigInteger defaultGasPriceWei = new BigInteger("20000000000");
 
     public SmartContractBot(String appId, String ledgerId, String party) {
         super.appId = appId;
@@ -95,8 +96,8 @@ public class SmartContractBot extends AbstractBot {
             pending.get(NewSmartContractRequest.TEMPLATE_ID).add(contract.id.contractId);
             if (metadataMap.containsKey(contract.id.contractId) && nonces.containsKey(contract.data.from)) {
                 BigInteger nonce = nonces.get(contract.data.from);
-                BigInteger gasPrice = defaultGasPriceWei;
-                BigInteger gas = new BigInteger(String.valueOf(contract.data.optGas.orElse(defaultGasLimit)));
+                BigInteger gasPrice = OperatorMain.DEFAULT_GAS_PRICE_WEI;
+                BigInteger gas = BigInteger.valueOf(contract.data.optGas.orElse(Long.MAX_VALUE));
                 BigInteger weiValue = UnitUtils.fromEtherUnitsToWei(
                         contract.data.optValue.orElse(new Wei(BigDecimal.ZERO)));
                 List<Type> constructorArgs = contract.data.ctorArgs.stream()
@@ -105,6 +106,18 @@ public class SmartContractBot extends AbstractBot {
                 String encodedConstructor = "";
                 if (!contract.data.ctorArgs.isEmpty()) {
                     encodedConstructor = FunctionEncoder.encodeConstructor(constructorArgs);
+                }
+                try {
+                    EthEstimateGas ethEstimateGas = Web3jProvider.getInstance().web3j.ethEstimateGas(
+                            Transaction.createEthCallTransaction(
+                                    contract.data.from,
+                                    null,
+                                    bin + encodedConstructor)).send();
+                    Thread.sleep(1000);
+                    gas = gas.min(ethEstimateGas.getAmountUsed());
+                } catch (Exception e) {
+                    log.warn(String.format("Could not estimate gas for new contract %s. Will use a gas limit of %s. " +
+                            "Exception: %s", contract.data.name, gas.toString(), e.getMessage()));
                 }
                 RawTransaction rawTransaction = RawTransaction.createContractTransaction(
                         nonce,

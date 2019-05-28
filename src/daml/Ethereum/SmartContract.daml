@@ -22,11 +22,15 @@ template NewSmartContractRequest
     ctorArgs    : [ABIValue]
     optValue    : Optional EtherUnits
     optGas      : Optional Int
+    optGasPrice : Optional EtherUnits
   where
     signatory operator, user
 
     ensure (optSolidity /= None || optBin /= None) &&
-      checkNesting ctorArgs 0 2
+      checkNesting ctorArgs 0 2 &&
+      fromOptional 0 optGas >= 0 &&
+      validEtherUnits (fromOptional zeroWei optValue) &&
+      validEtherUnits (fromOptional zeroWei optGasPrice)
 
     controller operator can
       NewSmartContractRequest_Accept : UnsignedNewContractTransactionCid
@@ -38,9 +42,10 @@ template NewSmartContractRequest
           gasPrice : EtherUnits
           txToSign : Text
         do
-          assert (fromOptional gas optGas == gas)
+          assert (fromOptional gas optGas >= gas)
+          assert (fromOptional gasPrice optGasPrice == gasPrice)
           let solidity = fromOptional "" optSolidity
-              value = fromOptional (Wei 0.0) optValue
+              value = fromOptional zeroWei optValue
           create UnsignedNewContractTransaction with ..
 
       NewSmartContractRequest_Reject : ()
@@ -64,6 +69,10 @@ template UnsignedNewContractTransaction
     txToSign : Text
   where
     signatory operator, user
+
+    ensure validEtherUnits value &&
+      validEtherUnits gasPrice &&
+      nonce >= 0
 
     controller user can
       UnsignedNewContractTransaction_Sign : SignedNewContractTransactionCid

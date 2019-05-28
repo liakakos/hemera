@@ -13,14 +13,16 @@ import hemera.model.ethereum.transfer.SignedTrasferTransaction;
 import hemera.model.ethereum.transfer.TransferRequest;
 import hemera.utils.LedgerUtils;
 
+import java.math.BigInteger;
 import java.util.*;
 
 public class OperatorMain {
     private static final String APP_ID = "HemeraOperator";
+    public static BigInteger DEFAULT_GAS_PRICE_WEI;
 
     public static void main(String[] args) {
-        if (args.length < 4) {
-            System.err.println("Usage: HOST PORT PARTY INFURA_ENDPOINT");
+        if (args.length < 5) {
+            System.err.println("Usage: HOST PORT PARTY INFURA_ENDPOINT DEFAULT_GAS_PRICE");
             System.exit(-1);
         }
 
@@ -28,6 +30,7 @@ public class OperatorMain {
         int ledgerPort = Integer.valueOf(args[1]);
         String party = args[2];
         Web3jProvider.getInstance().init(args[3]);
+        DEFAULT_GAS_PRICE_WEI = new BigInteger(args[4]);
 
         DamlLedgerClient client = DamlLedgerClient.forHostWithLedgerIdDiscovery(
                 ledgerHost, ledgerPort, Optional.empty());

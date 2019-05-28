@@ -73,6 +73,7 @@ template User
           ctorArgs : [ABIValue]
           optValue : Optional EtherUnits
           optGas : Optional Int
+          optGasPrice : Optional EtherUnits
         do create NewSmartContractRequest with name = contractName, ..
 
       nonconsuming User_Call : CallRequestCid
@@ -93,6 +94,7 @@ template User
           to : Text
           optValue : Optional EtherUnits
           optGas : Optional Int
+          optGasPrice : Optional EtherUnits
         do create TransactionRequest with name = functionName, ..
 
       nonconsuming User_SendEther : TransferRequestCid
@@ -101,6 +103,7 @@ template User
           to : Text
           value : EtherUnits
           optGas : Optional Int
+          optGasPrice : Optional EtherUnits
         do create TransferRequest with ..
 
     controller operator can

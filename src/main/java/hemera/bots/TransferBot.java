@@ -5,6 +5,7 @@ import com.daml.ledger.javaapi.data.Identifier;
 import com.daml.ledger.javaapi.data.Record;
 import com.daml.ledger.rxjava.components.LedgerViewFlowable;
 import com.daml.ledger.rxjava.components.helpers.CommandsAndPendingSet;
+import hemera.OperatorMain;
 import hemera.Web3jProvider;
 import hemera.model.ethereum.transfer.TransferRequest;
 import hemera.utils.AddressUtils;
@@ -23,8 +24,7 @@ import java.util.stream.Collectors;
 public class TransferBot extends AbstractBot {
 
     private final static Logger log = LoggerFactory.getLogger(TransferBot.class);
-    private final static long defaultGasLimit = 50000;
-    private final static BigInteger defaultGasPriceWei = new BigInteger("20000000000");
+    private final static long gasBaseFee = 21000;
 
     public TransferBot(String appId, String ledgerId, String party) {
         super.appId = appId;
@@ -54,8 +54,8 @@ public class TransferBot extends AbstractBot {
             pending.get(TransferRequest.TEMPLATE_ID).add(contract.id.contractId);
             if (nonces.containsKey(contract.data.from)) {
                 BigInteger nonce = nonces.get(contract.data.from);
-                BigInteger gasPrice = defaultGasPriceWei;
-                BigInteger gas = new BigInteger(String.valueOf(contract.data.optGas.orElse(defaultGasLimit)));
+                BigInteger gasPrice = OperatorMain.DEFAULT_GAS_PRICE_WEI;
+                BigInteger gas = BigInteger.valueOf(contract.data.optGas.orElse(gasBaseFee));
                 BigInteger weiValue = UnitUtils.fromEtherUnitsToWei(contract.data.value);
                 RawTransaction rawTransaction = RawTransaction.createEtherTransaction(
                         nonce,
@@ -67,7 +67,7 @@ public class TransferBot extends AbstractBot {
                 pending.get(TransferRequest.TEMPLATE_ID).add(contract.id.contractId);
                 return contract.id.exerciseTransferRequest_Accept(
                         nonce.longValue(),
-                        defaultGasLimit,
+                        gas.longValue(),
                         UnitUtils.fromWeiToEtherUnits(weiValue),
                         Numeric.toHexString(encodedTransaction)
                 );

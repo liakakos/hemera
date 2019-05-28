@@ -18,6 +18,7 @@
         <clientParty>Bob</clientParty>
         <infuraEndpoint>InfuraEndpoint</infuraEndpoint>
         <privateKey>yourPrivateKey</privateKey>
+        <defaultGasPriceWei>20000000000</defaultGasPriceWei>
     </properties>
 
     <dependencies>
@@ -126,6 +127,7 @@
                                 <argument>${ledgerPort}</argument>
                                 <argument>${operatorParty}</argument>
                                 <argument>${infuraEndpoint}</argument>
+                                <argument>${defaultGasPriceWei}</argument>
                             </arguments>
                         </configuration>
                     </execution>

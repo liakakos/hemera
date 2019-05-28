@@ -5,6 +5,9 @@ module Ethereum.Utils where
 import DA.Text
 
 
+gasBaseFee : Int = 21000  -- https://github.com/ethereum/wiki/wiki/Design-Rationale
+
+
 data EtherUnits = Wei    Decimal
                 | Kwei   Decimal
                 | Mwei   Decimal
@@ -16,6 +19,32 @@ data EtherUnits = Wei    Decimal
                 | Mether Decimal
                 | Gether Decimal
   deriving (Eq, Show)
+
+
+checkDecimals : Text -> Bool
+checkDecimals weiText =
+  let decimalsText = DA.Text.takeWhileEnd (\c -> c /= ".") weiText
+      optDecimals = parseDecimal decimalsText
+  in case optDecimals of
+    Some decimal -> decimal == 0.0
+    None -> False
+
+
+validEtherUnits : EtherUnits -> Bool
+validEtherUnits units = case units of
+  Wei    v -> v >= 0.0 && (checkDecimals $ show v)
+  Kwei   v -> v >= 0.0 && (checkDecimals $ show $ v * 1e3)
+  Mwei   v -> v >= 0.0 && (checkDecimals $ show $ v * 1e6)
+  Gwei   v -> v >= 0.0 && (checkDecimals $ show $ v * 1e9)
+  Szabo  v -> v >= 0.0 && (checkDecimals $ show $ v * 1e12)
+  Finney v -> v >= 0.0 && (checkDecimals $ show $ v * 1e15)
+  Ether  v -> v >= 0.0 && (checkDecimals $ show $ v * 1e18)
+  Kether v -> v >= 0.0 && (checkDecimals $ show $ v * 1e21)
+  Mether v -> v >= 0.0 && (checkDecimals $ show $ v * 1e24)
+  Gether v -> v >= 0.0 && (checkDecimals $ show $ v * 1e27)
+
+
+zeroWei : EtherUnits = Wei 0.0
 
 
 toWeiText : EtherUnits -> Text

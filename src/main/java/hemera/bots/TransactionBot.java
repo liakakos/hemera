@@ -5,6 +5,7 @@ import com.daml.ledger.javaapi.data.Identifier;
 import com.daml.ledger.javaapi.data.Record;
 import com.daml.ledger.rxjava.components.LedgerViewFlowable;
 import com.daml.ledger.rxjava.components.helpers.CommandsAndPendingSet;
+import hemera.OperatorMain;
 import hemera.Web3jProvider;
 import hemera.model.ethereum.transaction.TransactionRequest;
 import hemera.model.ethereum.utils.etherunits.Wei;
@@ -20,6 +21,8 @@ import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.crypto.RawTransaction;
 import org.web3j.crypto.TransactionEncoder;
+import org.web3j.protocol.core.methods.request.Transaction;
+import org.web3j.protocol.core.methods.response.EthEstimateGas;
 import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
@@ -30,9 +33,6 @@ import java.util.stream.Collectors;
 public class TransactionBot extends AbstractBot {
 
     private final static Logger log = LoggerFactory.getLogger(TransactionBot.class);
-    private static final String zeroAddress = "0x0000000000000000000000000000000000000000";
-    private final static long defaultGasLimit = 50000;
-    private final static BigInteger defaultGasPriceWei = new BigInteger("20000000000");
 
     public TransactionBot(String appId, String ledgerId, String party) {
         super.appId = appId;
@@ -62,8 +62,8 @@ public class TransactionBot extends AbstractBot {
             pending.get(TransactionRequest.TEMPLATE_ID).add(contract.id.contractId);
             if (nonces.containsKey(contract.data.from)) {
                 BigInteger nonce = nonces.get(contract.data.from);
-                BigInteger gasPrice = defaultGasPriceWei;
-                BigInteger gas = new BigInteger(String.valueOf(contract.data.optGas.orElse(defaultGasLimit)));
+                BigInteger gasPrice = OperatorMain.DEFAULT_GAS_PRICE_WEI;
+                BigInteger gas = BigInteger.valueOf(contract.data.optGas.orElse(Long.MAX_VALUE));
                 BigInteger weiValue = UnitUtils.fromEtherUnitsToWei(
                         contract.data.optValue.orElse(new Wei(BigDecimal.ZERO)));
                 List<Type> functionArgs = contract.data.args.stream()
@@ -71,6 +71,18 @@ public class TransactionBot extends AbstractBot {
                 List<TypeReference<?>> returns = ABIUtils.toWeb3jTypeReference(contract.data.returns);
                 Function function = new Function(contract.data.name, functionArgs, returns);
                 String encodedFunction = FunctionEncoder.encode(function);
+                try {
+                    EthEstimateGas ethEstimateGas = Web3jProvider.getInstance().web3j.ethEstimateGas(
+                            Transaction.createEthCallTransaction(
+                                    contract.data.from,
+                                    contract.data.to,
+                                    encodedFunction)).send();
+                    Thread.sleep(1000);
+                    gas = gas.min(ethEstimateGas.getAmountUsed());
+                } catch (Exception e) {
+                    log.warn(String.format("Could not estimate gas for transaction %s. Will use a gas limit of %s. " +
+                                    "Exception: %s", contract.data.name, gas.toString(), e.getMessage()));
+                }
                 RawTransaction rawTransaction = RawTransaction.createTransaction(
                         nonce,
                         gasPrice,
@@ -81,7 +93,7 @@ public class TransactionBot extends AbstractBot {
                 byte[] encodedTransaction = TransactionEncoder.encode(rawTransaction);
                 return contract.id.exerciseTransactionRequest_Accept(
                         nonce.longValue(),
-                        defaultGasLimit,
+                        gas.longValue(),
                         UnitUtils.fromWeiToEtherUnits(gasPrice),
                         Numeric.toHexString(encodedTransaction));
             } else {
