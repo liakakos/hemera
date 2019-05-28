@@ -68,7 +68,7 @@ public class TransferBot extends AbstractBot {
                 return contract.id.exerciseTransferRequest_Accept(
                         nonce.longValue(),
                         gas.longValue(),
-                        UnitUtils.fromWeiToEtherUnits(weiValue),
+                        UnitUtils.fromWeiToEtherUnits(gasPrice),
                         Numeric.toHexString(encodedTransaction)
                 );
             } else {
