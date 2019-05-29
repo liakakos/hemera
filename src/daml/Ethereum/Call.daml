@@ -20,6 +20,9 @@ template CallRequest
   where
     signatory operator, user
 
+    ensure validABIValues args &&
+      validABITypes returns
+
     controller operator can
       CallRequest_Respond : CallResponseCid
         with
@@ -27,6 +30,7 @@ template CallRequest
           sendStatus : SendStatus
         do
           assert (length response == length returns)
+          assert (validABIValues response)
           create CallResponse with ..
 
 

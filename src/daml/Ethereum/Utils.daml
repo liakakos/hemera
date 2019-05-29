@@ -64,12 +64,148 @@ toWeiText etherUnits =
 
 
 data ABIType = ABIBool
-             | ABIUint
-             | ABIInt
-             | ABIBytes
+             | ABIUint Int
+             | ABIInt Int
+             | ABIBytes Int
+             | ABIDynamicBytes
              | ABIString
              | ABIAddress
   deriving (Eq, Show)
+
+
+abiInt    : ABIType = ABIInt 256
+abiInt8   : ABIType = ABIInt 8
+abiInt16  : ABIType = ABIInt 16
+abiInt24  : ABIType = ABIInt 24
+abiInt32  : ABIType = ABIInt 32
+abiInt40  : ABIType = ABIInt 40
+abiInt48  : ABIType = ABIInt 48
+abiInt56  : ABIType = ABIInt 56
+abiInt64  : ABIType = ABIInt 64
+abiInt72  : ABIType = ABIInt 72
+abiInt80  : ABIType = ABIInt 80
+abiInt88  : ABIType = ABIInt 88
+abiInt96  : ABIType = ABIInt 96
+abiInt104 : ABIType = ABIInt 104
+abiInt112 : ABIType = ABIInt 112
+abiInt120 : ABIType = ABIInt 120
+abiInt128 : ABIType = ABIInt 128
+abiInt136 : ABIType = ABIInt 136
+abiInt144 : ABIType = ABIInt 144
+abiInt152 : ABIType = ABIInt 152
+abiInt160 : ABIType = ABIInt 160
+abiInt168 : ABIType = ABIInt 168
+abiInt176 : ABIType = ABIInt 176
+abiInt184 : ABIType = ABIInt 184
+abiInt192 : ABIType = ABIInt 192
+abiInt200 : ABIType = ABIInt 200
+abiInt208 : ABIType = ABIInt 208
+abiInt216 : ABIType = ABIInt 216
+abiInt224 : ABIType = ABIInt 224
+abiInt232 : ABIType = ABIInt 232
+abiInt240 : ABIType = ABIInt 240
+abiInt248 : ABIType = ABIInt 248
+abiInt256 : ABIType = ABIInt 256
+
+
+abiInts = [abiInt8,   abiInt16,  abiInt24,  abiInt32,
+           abiInt40,  abiInt48,  abiInt56,  abiInt64,
+           abiInt72,  abiInt80,  abiInt88,  abiInt96,
+           abiInt104, abiInt112, abiInt120, abiInt128,
+           abiInt136, abiInt144, abiInt152, abiInt160,
+           abiInt168, abiInt176, abiInt184, abiInt192,
+           abiInt200, abiInt208, abiInt216, abiInt224,
+           abiInt232, abiInt240, abiInt248, abiInt256]
+
+
+abiUint    : ABIType = ABIUint 256
+abiUint8   : ABIType = ABIUint 8
+abiUint16  : ABIType = ABIUint 16
+abiUint24  : ABIType = ABIUint 24
+abiUint32  : ABIType = ABIUint 32
+abiUint40  : ABIType = ABIUint 40
+abiUint48  : ABIType = ABIUint 48
+abiUint56  : ABIType = ABIUint 56
+abiUint64  : ABIType = ABIUint 64
+abiUint72  : ABIType = ABIUint 72
+abiUint80  : ABIType = ABIUint 80
+abiUint88  : ABIType = ABIUint 88
+abiUint96  : ABIType = ABIUint 96
+abiUint104 : ABIType = ABIUint 104
+abiUint112 : ABIType = ABIUint 112
+abiUint120 : ABIType = ABIUint 120
+abiUint128 : ABIType = ABIUint 128
+abiUint136 : ABIType = ABIUint 136
+abiUint144 : ABIType = ABIUint 144
+abiUint152 : ABIType = ABIUint 152
+abiUint160 : ABIType = ABIUint 160
+abiUint168 : ABIType = ABIUint 168
+abiUint176 : ABIType = ABIUint 176
+abiUint184 : ABIType = ABIUint 184
+abiUint192 : ABIType = ABIUint 192
+abiUint200 : ABIType = ABIUint 200
+abiUint208 : ABIType = ABIUint 208
+abiUint216 : ABIType = ABIUint 216
+abiUint224 : ABIType = ABIUint 224
+abiUint232 : ABIType = ABIUint 232
+abiUint240 : ABIType = ABIUint 240
+abiUint248 : ABIType = ABIUint 248
+abiUint256 : ABIType = ABIUint 256
+
+
+abiUints = [abiUint8,   abiUint16,  abiUint24,  abiUint32,
+            abiUint40,  abiUint48,  abiUint56,  abiUint64,
+            abiUint72,  abiUint80,  abiUint88,  abiUint96,
+            abiUint104, abiUint112, abiUint120, abiUint128,
+            abiUint136, abiUint144, abiUint152, abiUint160,
+            abiUint168, abiUint176, abiUint184, abiUint192,
+            abiUint200, abiUint208, abiUint216, abiUint224,
+            abiUint232, abiUint240, abiUint248, abiUint256]
+
+
+abiByte    : ABIType = ABIBytes 1
+abiBytes1  : ABIType = ABIBytes 1
+abiBytes2  : ABIType = ABIBytes 2
+abiBytes3  : ABIType = ABIBytes 3
+abiBytes4  : ABIType = ABIBytes 4
+abiBytes5  : ABIType = ABIBytes 5
+abiBytes6  : ABIType = ABIBytes 6
+abiBytes7  : ABIType = ABIBytes 7
+abiBytes8  : ABIType = ABIBytes 8
+abiBytes9  : ABIType = ABIBytes 9
+abiBytes10 : ABIType = ABIBytes 10
+abiBytes11 : ABIType = ABIBytes 11
+abiBytes12 : ABIType = ABIBytes 12
+abiBytes13 : ABIType = ABIBytes 13
+abiBytes14 : ABIType = ABIBytes 14
+abiBytes15 : ABIType = ABIBytes 15
+abiBytes16 : ABIType = ABIBytes 16
+abiBytes17 : ABIType = ABIBytes 17
+abiBytes18 : ABIType = ABIBytes 18
+abiBytes19 : ABIType = ABIBytes 19
+abiBytes20 : ABIType = ABIBytes 20
+abiBytes21 : ABIType = ABIBytes 21
+abiBytes22 : ABIType = ABIBytes 22
+abiBytes23 : ABIType = ABIBytes 23
+abiBytes24 : ABIType = ABIBytes 24
+abiBytes25 : ABIType = ABIBytes 25
+abiBytes26 : ABIType = ABIBytes 26
+abiBytes27 : ABIType = ABIBytes 27
+abiBytes28 : ABIType = ABIBytes 28
+abiBytes29 : ABIType = ABIBytes 29
+abiBytes30 : ABIType = ABIBytes 30
+abiBytes31 : ABIType = ABIBytes 31
+abiBytes32 : ABIType = ABIBytes 32
+
+
+abiBytes = [abiBytes1,  abiBytes2,  abiBytes3,  abiBytes4,
+            abiBytes5,  abiBytes6,  abiBytes7,  abiBytes8,
+            abiBytes9,  abiBytes10, abiBytes11, abiBytes12,
+            abiBytes13, abiBytes14, abiBytes15, abiBytes16,
+            abiBytes17, abiBytes18, abiBytes19, abiBytes20,
+            abiBytes21, abiBytes22, abiBytes23, abiBytes24,
+            abiBytes25, abiBytes26, abiBytes27, abiBytes28,
+            abiBytes29, abiBytes30, abiBytes31, abiBytes32]
 
 
 data ABIValue = ABIValue with
@@ -77,6 +213,29 @@ data ABIValue = ABIValue with
                   abiValue : Text
               | ABIList [ABIValue]
   deriving (Eq, Show)
+
+
+validABITypes : [ABIType] -> Bool
+validABITypes xs = and (map validABIType xs)
+
+
+validABIType : ABIType -> Bool
+validABIType t = case t of
+  ABIInt   i -> elem (ABIInt i) abiInts
+  ABIUint  u -> elem (ABIUint u) abiUints
+  ABIBytes b -> elem (ABIBytes b) abiBytes
+  _          -> True
+
+
+validABIValues : [ABIValue] -> Bool
+validABIValues xs = and (map validABIValue xs)
+
+
+validABIValue : ABIValue -> Bool
+validABIValue abiValue = case abiValue of
+    ABIValue t v -> validABIType t  -- skip value checks
+    ABIList (x::xs) -> (validABIValue x) && validABIValue (ABIList xs)
+    ABIList [] -> True
 
 
 data SendStatus = New

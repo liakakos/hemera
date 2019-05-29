@@ -26,7 +26,9 @@ template TransactionRequest
   where
     signatory operator, user
 
-    ensure fromOptional 0 optGas >= 0 &&
+    ensure validABIValues args &&
+      validABITypes returns &&
+      fromOptional 0 optGas >= 0 &&
       validEtherUnits (fromOptional zeroWei optValue) &&
       validEtherUnits (fromOptional zeroWei optGasPrice)
 

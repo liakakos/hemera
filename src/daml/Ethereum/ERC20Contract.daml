@@ -28,7 +28,7 @@ template ERC20Contract
              with
                name = "totalSupply"
                args = []
-               returns = [ABIUint]
+               returns = [abiUint256]
                optFrom = None
                to = address
                ..
@@ -40,7 +40,7 @@ template ERC20Contract
           let abiOwner = ABIValue with
                                 abiType = ABIAddress
                                 abiValue = owner
-              balance = ABIUint
+              balance = abiUint256
           create CallRequest
             with
               name = "balanceOf"
@@ -61,7 +61,7 @@ template ERC20Contract
               abiSpender = ABIValue with
                              abiType = ABIAddress
                              abiValue = spender
-              remaining = ABIUint
+              remaining = abiUint256
           create CallRequest
             with
               name = "allowance"
@@ -83,7 +83,7 @@ template ERC20Contract
                         abiType = ABIAddress
                         abiValue = to
               abiValue = ABIValue with
-                           abiType = ABIUint
+                           abiType = abiUint256
                            abiValue = value
               success = ABIBool
           create TransactionRequest
@@ -107,7 +107,7 @@ template ERC20Contract
                              abiType = ABIAddress
                              abiValue = spender
               abiValue = ABIValue with
-                           abiType = ABIUint
+                           abiType = abiUint256
                            abiValue = value
               success = ABIBool
           create TransactionRequest
@@ -136,7 +136,7 @@ template ERC20Contract
                         abiType = ABIAddress
                         abiValue = from
               abiValue = ABIValue with
-                           abiType = ABIUint
+                           abiType = abiUint256
                            abiValue = value
               success = ABIBool
           create TransactionRequest
@@ -174,7 +174,7 @@ template ERC20Contract
              with
                name = "decimals"
                args = []
-               returns = [ABIUint]
+               returns = [abiUint8]
                optFrom = None
                to = address
                ..

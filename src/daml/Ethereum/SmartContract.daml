@@ -27,6 +27,7 @@ template NewSmartContractRequest
     signatory operator, user
 
     ensure (optSolidity /= None || optBin /= None) &&
+      validABIValues ctorArgs &&
       checkNesting ctorArgs 0 2 &&
       fromOptional 0 optGas >= 0 &&
       validEtherUnits (fromOptional zeroWei optValue) &&
