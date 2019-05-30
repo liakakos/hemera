@@ -21,7 +21,7 @@ Finally the user requests deployment of the smart contract by exercising the `Si
 
 ### Call
 
-The Call module is used to query deployed contracts for their state by calling functions that are constant and their `"stateMutability"` property is set to `"view"`. Such function calls do not alter the state, therefore they require no gas or transaction signing. The user creates a `CallRequest` by exercising the `User_Call` choice on their role contract and pass in the contract address, function name, any arguments and any function return types. Optionally they can include a caller address.
+The Call module is used to query deployed contracts for their state by calling functions that are constant and their `"stateMutability"` property is set to `"view"`. Such function calls do not alter the state, therefore they require no gas or transaction signing. The user creates a `CallRequest` by exercising the `User_Call` choice on their role contract and passes in the contract address, function name, any arguments and any function return types. Optionally they can include a caller address.
 The operator responds to the request with a `CallResponse` that contains the original data along with the function output and the broadcast details
 
 ### Transaction
@@ -109,4 +109,4 @@ _Note that the privateKey string must not contain any 0x prefix_
 
 ## Disclaimer
 
-As the [Licensce](https://github.com/liakakos/hemera/blob/master/LICENSE#L153) states I assume no liability for any damages or losses arising from the use of this Work. Please proceed at your own risk!
+As the [License](https://github.com/liakakos/hemera/blob/master/LICENSE#L153) states I assume no liability for any damages or losses arising from the use of this Work. Please proceed at your own risk!
