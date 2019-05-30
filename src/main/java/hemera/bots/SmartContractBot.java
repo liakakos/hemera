@@ -65,7 +65,6 @@ public class SmartContractBot extends AbstractBot {
         smartContractRequests.forEach(contract -> {
             if (contract.data.optSolidity.isPresent()) {
                 String solSource = contract.data.optSolidity.get();
-                log.info(String.format("Solidity is: %s", solSource));
 
                 try {
                     SolidityCompiler.Result res = SolidityCompiler.compile(
@@ -75,15 +74,11 @@ public class SmartContractBot extends AbstractBot {
                             SolidityCompiler.Options.BIN,
                             SolidityCompiler.Options.INTERFACE,
                             SolidityCompiler.Options.METADATA);
-                    log.info(String.format("Out: %s", res.output));
-                    log.info(String.format("Err: %s", res.errors));
                     if (res.isFailed()) {
                         log.error("Failed to compile solidity!");
                     } else {
                         CompilationResult result = CompilationResult.parse(res.output);
                         CompilationResult.ContractMetadata metadata = result.getContract(contract.data.name);
-                        log.info(String.format("Binary is %s", metadata.bin));
-                        log.info(String.format("ABI is %s", metadata.abi));
                         metadataMap.put(contract.id.contractId, metadata);
                     }
                 } catch (UnsupportedOperationException | IOException e) {

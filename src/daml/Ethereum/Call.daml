@@ -29,7 +29,6 @@ template CallRequest
           response : [ABIValue]
           sendStatus : SendStatus
         do
-          assert (length response == length returns)
           assert (validABIValues response)
           create CallResponse with ..
 
