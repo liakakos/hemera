@@ -3,6 +3,8 @@ daml 1.2
 module Ethereum.Utils where
 
 import DA.Text
+import DA.List
+import DA.Optional
 
 
 gasBaseFee : Int = 21000  -- https://github.com/ethereum/wiki/wiki/Design-Rationale
@@ -233,7 +235,8 @@ validABIValues xs = and (map validABIValue xs)
 
 validABIValue : ABIValue -> Bool
 validABIValue abiValue = case abiValue of
-    ABIValue t v -> validABIType t  -- skip value checks
+    ABIValue ABIAddress a -> validAddress a
+    ABIValue t v -> validABIType t  -- skip other value checks
     ABIList (x::xs) -> (validABIValue x) && validABIValue (ABIList xs)
     ABIList [] -> True
 
@@ -256,3 +259,96 @@ checkNesting (x::xs) i limit =
   case x of
     ABIList y -> checkNesting y (i+1) limit && checkNesting xs i limit
     _  -> checkNesting xs i limit
+
+
+hexToDec : Text -> Optional Int
+hexToDec c = case c of
+  "a" -> Some 10
+  "A" -> Some 10
+  "b" -> Some 11
+  "B" -> Some 11
+  "c" -> Some 12
+  "C" -> Some 12
+  "d" -> Some 13
+  "D" -> Some 13
+  "e" -> Some 14
+  "E" -> Some 14
+  "f" -> Some 15
+  "F" -> Some 15
+  _ -> let optInt = parseInt c
+       in case optInt of
+       Some i -> if i >= 0 && i <= 9 then optInt else None
+       None -> None
+
+
+parseByte : Text -> Optional Int
+parseByte byte | DA.Text.length byte /= 2 = None
+parseByte byte = let chars = explode byte
+                     firstHex = hexToDec $ head chars
+                     lastHex = hexToDec $ last chars
+                     hello = 0xc3
+                 in if firstHex == None || lastHex == None then None
+                    else Some (16 * (fromSome firstHex) + (fromSome lastHex))
+
+
+stripRLPListLength : Text -> Text
+stripRLPListLength rlp =
+  let rlps = toByteList rlp
+      len = DA.List.length rlps
+      in if len == 0 then rlp else
+      let prefix = byteToInt $ head rlps
+      in case prefix of
+      p | p < 0x7f                    -> rlp
+      p | p <= 0xb7 && len > p - 0x7f -> rlp
+      p | p <= 0xbf && len > p - 0xb7
+          + byteToInt (implode (DA.List.take (p - 0xb7) (DA.List.drop 1 rlps)))
+                                      -> rlp
+      p | p <= 0xf7 && len > p - 0xc0 -> implode $ tail rlps
+      p | p <= 0xff && len > p - 0xf7 && len > p - 0xf7
+          + byteToInt (implode (DA.List.take (p - 0xf7) (DA.List.drop 1 rlps)))
+                                      -> implode $ DA.List.drop (1 + p - 0xf7) rlps
+      _                               -> rlp
+
+
+byteToInt : Text -> Int
+byteToInt hexWithPrefix = fromSome $ parseBytes $ toByteList hexWithPrefix
+
+
+sumBytes : [Int] -> Int
+sumBytes [] = 0
+sumBytes xs = last xs + 256 * sumBytes (init xs)
+
+
+parseBytes : [Text] -> Optional Int
+parseBytes byteList =
+  let optInts = map parseByte byteList
+  in if any isNone optInts then None else
+    let ints = map fromSome optInts
+    in Some (sumBytes ints)
+
+
+toByteList : Text -> [Text]
+toByteList hexWithPrefix =
+  let hex = DA.Text.dropPrefix "0x" hexWithPrefix
+  in map implode $ group2 (explode hex)
+
+
+group2 : [Text] -> [[Text]]
+group2 [] = []
+group2 l = (DA.List.take 2 l) :: (group2 (DA.List.drop 2 l))
+
+
+validHex : Text -> Bool
+validHex hexWithPrefix =
+  let bytes = toByteList hexWithPrefix
+  in not (any isNone $ map parseByte bytes)
+
+
+validAddress : Text -> Bool
+validAddress addr = validHex addr && DA.List.length (toByteList addr) == 20
+
+
+validSignedTx : Text -> Text -> Bool
+validSignedTx unsigned signed =
+  validHex signed &&
+  DA.Text.isPrefixOf (stripRLPListLength unsigned) (stripRLPListLength signed)

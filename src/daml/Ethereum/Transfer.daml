@@ -23,7 +23,9 @@ template TransferRequest
   where
     signatory operator, user
 
-    ensure fromOptional gasBaseFee optGas >= gasBaseFee &&
+    ensure validAddress from &&
+      validAddress to &&
+      fromOptional gasBaseFee optGas >= gasBaseFee &&
       validEtherUnits value &&
       validEtherUnits (fromOptional zeroWei optGasPrice)
 
@@ -60,7 +62,8 @@ template UnsignedTrasferTransaction
 
     ensure validEtherUnits value &&
       validEtherUnits gasPrice &&
-      nonce >= 0
+      nonce >= 0 &&
+      validHex txToSign
 
     controller user can
       UnsignedTrasferTransaction_Sign : SignedTrasferTransactionCid
@@ -84,6 +87,8 @@ template SignedTrasferTransaction
     sendStatus : SendStatus
   where
     signatory operator, user
+
+    ensure validSignedTx txToSign signedTx
 
     controller user can
       SignedTrasferTransaction_Send : SignedTrasferTransactionCid

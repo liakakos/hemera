@@ -26,7 +26,8 @@ template NewSmartContractRequest
   where
     signatory operator, user
 
-    ensure (optSolidity /= None || optBin /= None) &&
+    ensure validAddress from &&
+      (optSolidity /= None || optBin /= None) &&
       validABIValues ctorArgs &&
       checkNesting ctorArgs 0 2 &&
       fromOptional 0 optGas >= 0 &&
@@ -73,7 +74,8 @@ template UnsignedNewContractTransaction
 
     ensure validEtherUnits value &&
       validEtherUnits gasPrice &&
-      nonce >= 0
+      nonce >= 0 &&
+      validHex txToSign
 
     controller user can
       UnsignedNewContractTransaction_Sign : SignedNewContractTransactionCid
@@ -101,6 +103,8 @@ template SignedNewContractTransaction
     sendStatus : SendStatus
   where
     signatory operator, user
+
+    ensure validSignedTx txToSign signedTx
 
     controller user can
       SignedNewContractTransaction_Deploy : SignedNewContractTransactionCid

@@ -28,6 +28,8 @@ template TransactionRequest
 
     ensure validABIValues args &&
       validABITypes returns &&
+      validAddress from &&
+      validAddress to &&
       fromOptional 0 optGas >= 0 &&
       validEtherUnits (fromOptional zeroWei optValue) &&
       validEtherUnits (fromOptional zeroWei optGasPrice)
@@ -68,7 +70,8 @@ template UnsignedTransaction
 
     ensure validEtherUnits value &&
       validEtherUnits gasPrice &&
-      nonce >= 0
+      nonce >= 0 &&
+      validHex txToSign
 
     controller user can
       UnsignedTransaction_Sign : SignedTransactionCid
@@ -95,6 +98,8 @@ template SignedTransaction
     sendStatus : SendStatus
   where
     signatory operator, user
+
+    ensure validSignedTx txToSign signedTx
 
     controller user can
       SignedTransaction_Send : SignedTransactionCid
