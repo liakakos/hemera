@@ -50,6 +50,10 @@ template TransactionRequest
       TransactionRequest_Reject : ()
         do return ()
 
+    controller user can
+      TransactionRequest_Archive : ()
+        do return ()
+
 
 template UnsignedTransaction
   with
@@ -79,6 +83,9 @@ template UnsignedTransaction
           signedTx : Text
         do create SignedTransaction with sendStatus = New, ..
 
+      UnsignedTransaction_Archive : ()
+        do return ()
+
 
 template SignedTransaction
   with
@@ -104,6 +111,9 @@ template SignedTransaction
     controller user can
       SignedTransaction_Send : SignedTransactionCid
         do create this with sendStatus = Pending
+
+      SignedTransaction_Archive : ()
+        do return ()
 
     controller operator can
       SignedTransaction_Sent : SignedTransactionCid

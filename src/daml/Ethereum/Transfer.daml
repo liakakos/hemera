@@ -45,6 +45,10 @@ template TransferRequest
       TransferRequest_Reject : ()
         do return ()
 
+    controller user can
+      TransferRequest_Archive : ()
+        do return ()
+
 
 template UnsignedTrasferTransaction
   with
@@ -71,6 +75,9 @@ template UnsignedTrasferTransaction
           signedTx : Text
         do create SignedTrasferTransaction with sendStatus = New, ..
 
+      UnsignedTrasferTransaction_Archive : ()
+        do return ()
+
 
 template SignedTrasferTransaction
   with
@@ -93,6 +100,9 @@ template SignedTrasferTransaction
     controller user can
       SignedTrasferTransaction_Send : SignedTrasferTransactionCid
         do create this with sendStatus = Pending
+
+      SignedTrasferTransaction_Archive : ()
+        do return ()
 
     controller operator can
       SignedTrasferTransaction_Sent : SignedTrasferTransactionCid

@@ -53,6 +53,10 @@ template NewSmartContractRequest
       NewSmartContractRequest_Reject : ()
         do return ()
 
+    controller user can
+      NewSmartContractRequest_Archive : ()
+        do return ()
+
 
 template UnsignedNewContractTransaction
   with
@@ -83,6 +87,9 @@ template UnsignedNewContractTransaction
           signedTx : Text
         do create SignedNewContractTransaction with sendStatus = New, ..
 
+      UnsignedNewContractTransaction_Archive : ()
+        do return ()
+
 
 template SignedNewContractTransaction
   with
@@ -109,6 +116,9 @@ template SignedNewContractTransaction
     controller user can
       SignedNewContractTransaction_Deploy : SignedNewContractTransactionCid
         do create this with sendStatus = Pending
+
+      SignedNewContractTransaction_Archive : ()
+        do return ()
 
     controller operator can
       SignedNewContractTransaction_Sent : SignedNewContractTransactionCid
