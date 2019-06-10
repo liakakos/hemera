@@ -1,0 +1,3 @@
+# Use Haskell syntax highlighting for `.daml` files
+*.daml linguist-language=Haskell
+
