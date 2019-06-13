@@ -1,10 +1,10 @@
 daml 1.2
 module Main where
 
-import Ethereum.Call
-import Ethereum.ERC20Contract
-import Ethereum.Onboarding
-import Ethereum.SmartContract
-import Ethereum.Transaction
-import Ethereum.Transfer
-import Ethereum.Utils
+import Ethereum.Call()
+import Ethereum.ERC20Contract()
+import Ethereum.Onboarding()
+import Ethereum.SmartContract()
+import Ethereum.Transaction()
+import Ethereum.Transfer()
+import Ethereum.Utils()
