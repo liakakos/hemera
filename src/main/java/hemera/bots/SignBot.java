@@ -7,7 +7,7 @@ import com.daml.ledger.rxjava.components.LedgerViewFlowable;
 import com.daml.ledger.rxjava.components.helpers.CommandsAndPendingSet;
 import hemera.model.ethereum.smartcontract.UnsignedNewContractTransaction;
 import hemera.model.ethereum.transaction.UnsignedTransaction;
-import hemera.model.ethereum.transfer.UnsignedTrasferTransaction;
+import hemera.model.ethereum.transfer.UnsignedTransferTransaction;
 import io.reactivex.Flowable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,9 +39,9 @@ public class SignBot extends AbstractBot {
         List<UnsignedTransaction.Contract> unsignedTransactions =
                 (List<UnsignedTransaction.Contract>)(List<?>)
                         getContracts(ledgerView, UnsignedTransaction.TEMPLATE_ID);
-        List<UnsignedTrasferTransaction.Contract> unsignedTransferTransactions =
-                (List<UnsignedTrasferTransaction.Contract>)(List<?>)
-                        getContracts(ledgerView, UnsignedTrasferTransaction.TEMPLATE_ID);
+        List<UnsignedTransferTransaction.Contract> unsignedTransferTransactions =
+                (List<UnsignedTransferTransaction.Contract>)(List<?>)
+                        getContracts(ledgerView, UnsignedTransferTransaction.TEMPLATE_ID);
 
         if (unsignedNewContractTransactions.isEmpty()
                 && unsignedTransactions.isEmpty()
@@ -56,7 +56,7 @@ public class SignBot extends AbstractBot {
         Map<Identifier, Set<String>> pending = new HashMap<>();
         pending.putIfAbsent(UnsignedNewContractTransaction.TEMPLATE_ID, new HashSet<>());
         pending.putIfAbsent(UnsignedTransaction.TEMPLATE_ID, new HashSet<>());
-        pending.putIfAbsent(UnsignedTrasferTransaction.TEMPLATE_ID, new HashSet<>());
+        pending.putIfAbsent(UnsignedTransferTransaction.TEMPLATE_ID, new HashSet<>());
 
         Credentials credentials = Credentials.create("0x" + hemera.ClientMain.PRIVATE_KEY);
 
@@ -83,8 +83,8 @@ public class SignBot extends AbstractBot {
             RawTransaction rawTx = TransactionDecoder.decode(txToSign);
             byte[] signedTx = TransactionEncoder.signMessage(rawTx, credentials);
             String signedTxHex = Numeric.toHexString(signedTx);
-            pending.get(UnsignedTrasferTransaction.TEMPLATE_ID).add(contract.id.contractId);
-            return contract.id.exerciseUnsignedTrasferTransaction_Sign(signedTxHex);
+            pending.get(UnsignedTransferTransaction.TEMPLATE_ID).add(contract.id.contractId);
+            return contract.id.exerciseUnsignedTransferTransaction_Sign(signedTxHex);
         }).collect(Collectors.toList());
 
         commandList.addAll(transactionCommandList);

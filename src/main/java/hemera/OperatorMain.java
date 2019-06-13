@@ -9,7 +9,7 @@ import hemera.model.ethereum.smartcontract.NewSmartContractRequest;
 import hemera.model.ethereum.smartcontract.SignedNewContractTransaction;
 import hemera.model.ethereum.transaction.SignedTransaction;
 import hemera.model.ethereum.transaction.TransactionRequest;
-import hemera.model.ethereum.transfer.SignedTrasferTransaction;
+import hemera.model.ethereum.transfer.SignedTransferTransaction;
 import hemera.model.ethereum.transfer.TransferRequest;
 import hemera.utils.LedgerUtils;
 
@@ -71,7 +71,7 @@ public class OperatorMain {
         Set<Identifier> signedTransactionTids = new HashSet<>(Arrays.asList(
                 SignedNewContractTransaction.TEMPLATE_ID,
                 SignedTransaction.TEMPLATE_ID,
-                SignedTrasferTransaction.TEMPLATE_ID));
+                SignedTransferTransaction.TEMPLATE_ID));
         TransactionFilter signedTransactionFilter = LedgerUtils.filterFor(signedTransactionTids, party);
         SendBot sendBot = new SendBot(APP_ID, ledgerId, party);
         Bot.wire(APP_ID, client, signedTransactionFilter, sendBot::process, sendBot::getRecordFromContract);

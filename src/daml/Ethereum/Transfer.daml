@@ -7,8 +7,8 @@ import Ethereum.Utils
 import DA.Optional
 
 type TransferRequestCid = ContractId TransferRequest
-type UnsignedTrasferTransactionCid = ContractId UnsignedTrasferTransaction
-type SignedTrasferTransactionCid = ContractId SignedTrasferTransaction
+type UnsignedTransferTransactionCid = ContractId UnsignedTransferTransaction
+type SignedTransferTransactionCid = ContractId SignedTransferTransaction
 
 
 template TransferRequest
@@ -30,7 +30,7 @@ template TransferRequest
       validEtherUnits (fromOptional zeroWei optGasPrice)
 
     controller operator can
-      TransferRequest_Accept : UnsignedTrasferTransactionCid
+      TransferRequest_Accept : UnsignedTransferTransactionCid
         with
           nonce : Int
           gas : Int
@@ -40,7 +40,7 @@ template TransferRequest
           assert (gas >= gasBaseFee)
           assert (fromOptional gas optGas >= gas)
           assert (fromOptional gasPrice optGasPrice == gasPrice)
-          create UnsignedTrasferTransaction with ..
+          create UnsignedTransferTransaction with ..
 
       TransferRequest_Reject : ()
         do return ()
@@ -50,7 +50,7 @@ template TransferRequest
         do return ()
 
 
-template UnsignedTrasferTransaction
+template UnsignedTransferTransaction
   with
     operator : Party
     user     : Party
@@ -70,16 +70,16 @@ template UnsignedTrasferTransaction
       validHex txToSign
 
     controller user can
-      UnsignedTrasferTransaction_Sign : SignedTrasferTransactionCid
+      UnsignedTransferTransaction_Sign : SignedTransferTransactionCid
         with
           signedTx : Text
-        do create SignedTrasferTransaction with sendStatus = New, ..
+        do create SignedTransferTransaction with sendStatus = New, ..
 
-      UnsignedTrasferTransaction_Archive : ()
+      UnsignedTransferTransaction_Archive : ()
         do return ()
 
 
-template SignedTrasferTransaction
+template SignedTransferTransaction
   with
     operator   : Party
     user       : Party
@@ -98,21 +98,21 @@ template SignedTrasferTransaction
     ensure validSignedTx txToSign signedTx
 
     controller user can
-      SignedTrasferTransaction_Send : SignedTrasferTransactionCid
+      SignedTransferTransaction_Send : SignedTransferTransactionCid
         do create this with sendStatus = Pending
 
-      SignedTrasferTransaction_Archive : ()
+      SignedTransferTransaction_Archive : ()
         do return ()
 
     controller operator can
-      SignedTrasferTransaction_Sent : SignedTrasferTransactionCid
+      SignedTransferTransaction_Sent : SignedTransferTransactionCid
         with
           newSendStatus : SendStatus
         do
           assert (sendStatus == Pending)
           create this with sendStatus = newSendStatus
 
-      SignedTrasferTransaction_Fail : SignedTrasferTransactionCid
+      SignedTransferTransaction_Fail : SignedTransferTransactionCid
         with
           reason : Text
         do create this with sendStatus = FailedToSend with ..

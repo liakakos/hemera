@@ -7,7 +7,7 @@ import com.daml.ledger.rxjava.components.Bot;
 import hemera.bots.SignBot;
 import hemera.model.ethereum.smartcontract.UnsignedNewContractTransaction;
 import hemera.model.ethereum.transaction.UnsignedTransaction;
-import hemera.model.ethereum.transfer.UnsignedTrasferTransaction;
+import hemera.model.ethereum.transfer.UnsignedTransferTransaction;
 import hemera.utils.LedgerUtils;
 
 import java.util.*;
@@ -38,7 +38,7 @@ public class ClientMain {
     Set<Identifier> unsignedTransactionTids = new HashSet<>(Arrays.asList(
             UnsignedNewContractTransaction.TEMPLATE_ID,
             UnsignedTransaction.TEMPLATE_ID,
-            UnsignedTrasferTransaction.TEMPLATE_ID));
+            UnsignedTransferTransaction.TEMPLATE_ID));
     TransactionFilter unsignedTransactionFilter = LedgerUtils.filterFor(unsignedTransactionTids, party);
     SignBot signBot = new SignBot(APP_ID, ledgerId, party);
     Bot.wire(APP_ID, client, unsignedTransactionFilter, signBot::process, signBot::getRecordFromContract);
