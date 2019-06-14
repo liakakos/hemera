@@ -3,8 +3,70 @@ module Main where
 
 import Ethereum.Call()
 import Ethereum.ERC20Contract()
-import Ethereum.Onboarding()
+import Ethereum.Onboarding
 import Ethereum.SmartContract()
 import Ethereum.Transaction()
 import Ethereum.Transfer()
 import Ethereum.Utils()
+
+
+setup = scenario do
+  -- name Alice the operator and Bob the user
+  [alice, bob] <- mapA getParty ["Alice", "Bob"]
+  operatorCid <- alice `submit` create Operator
+    with
+      operator = alice
+  userInvitationCid <- alice `submit` exercise operatorCid Operator_InviteUser
+    with
+      user = bob
+  userCid <- bob `submit` exercise userInvitationCid UserInvitation_Accept
+
+  -- give the user some of the most popular ERC-20 User Contracts
+  -- (note these will work only on the mainnet)
+
+  -- Binance
+  bnbUserCid <- alice `submit` exercise operatorCid Operator_ERC20User
+    with
+      user = bob
+      name = "BNB"
+      symbol = "BNB"
+      decimals = 18
+      address = "0xB8c77482e45F1F44dE1745F52C74426C631bDD52"
+
+  -- Maker
+  mkrUserCid <- alice `submit` exercise operatorCid Operator_ERC20User
+    with
+      user = bob
+      name = "Maker"
+      symbol = "MKR"
+      decimals = 18
+      address = "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2"
+
+  -- ChainLink
+  linkUserCid <- alice `submit` exercise operatorCid Operator_ERC20User
+    with
+      user = bob
+      name = "ChainLink Token"
+      symbol = "LINK"
+      decimals = 18
+      address = "0x514910771af9ca656af840dff83e8264ecf986ca"
+
+  -- Crypto.com
+  croUserCid <- alice `submit` exercise operatorCid Operator_ERC20User
+    with
+      user = bob
+      name = "CRO"
+      symbol = "CRO"
+      decimals = 8
+      address = "0xa0b73e1ff0b80914ab6fe0444e65848c4c34450b"
+
+  -- Basic Attention Token
+  croUserCid <- alice `submit` exercise operatorCid Operator_ERC20User
+    with
+      user = bob
+      name = "Basic Attention Token"
+      symbol = "BAT"
+      decimals = 18
+      address = "0x0d8775f648430679a709e98d2b0cb6250d2887ef"
+
+  return ()
